@@ -20,13 +20,17 @@ import (
 	"context"
 	"time"
 
+	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	autotunev1alpha1 "github.com/mikeziminio/queue-autotuner/api/v1alpha1"
 )
+
+const DeploymentKind = "Deployment"
 
 // QueueScalingPolicyReconciler reconciles a QueueScalingPolicy object
 type QueueScalingPolicyReconciler struct {
@@ -56,7 +60,41 @@ func (r *QueueScalingPolicyReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 
 	// todo: добавить обращение в rmq, логику скейлинга
-	log.Info("Reconcile QueueScalingPolicy", "name", policy.Name)
+	log.Info("Reconcile QueueScalingPolicy",
+		"name", policy.Name,
+		"namespace", policy.Namespace,
+	)
+
+	if policy.Spec.TargetRef.Kind != DeploymentKind {
+		log.Error(nil, "unsupported target kind (expected \"Deployment\")",
+			"kind", policy.Spec.TargetRef.Kind,
+		)
+		return ctrl.Result{}, nil
+	}
+
+	var deploy appsv1.Deployment
+	name := policy.Spec.TargetRef.Name
+	ns := policy.Spec.TargetRef.Namespace
+	if ns == "" {
+		ns = policy.Namespace
+	}
+	err = r.Get(ctx, types.NamespacedName{
+		Namespace: ns,
+		Name:      name,
+	}, &deploy)
+	if err != nil {
+		log.Error(nil, "failed to get Deployment",
+			"name", name,
+			"namespace", ns,
+		)
+		return ctrl.Result{}, nil
+	}
+
+	log.Info("Target deployment found",
+		"name", deploy.Name,
+		"namespace", deploy.Namespace,
+		"replicas", deploy.Spec.Replicas,
+	)
 
 	return ctrl.Result{
 		RequeueAfter: 30 * time.Second,
