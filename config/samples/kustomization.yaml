@@ -1,0 +1,4 @@
+## Append samples of your project ##
+resources:
+- autotune_v1alpha1_queuescalingpolicy.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples
