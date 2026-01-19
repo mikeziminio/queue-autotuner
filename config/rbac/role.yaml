@@ -1,11 +1,32 @@
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  labels:
-    app.kubernetes.io/name: queue-autotunner
-    app.kubernetes.io/managed-by: kustomize
   name: manager-role
 rules:
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get", "list", "watch"]
+- apiGroups:
+  - autotune.mikeziminio.github.io
+  resources:
+  - queuescalingpolicies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - autotune.mikeziminio.github.io
+  resources:
+  - queuescalingpolicies/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - autotune.mikeziminio.github.io
+  resources:
+  - queuescalingpolicies/status
+  verbs:
+  - get
+  - patch
+  - update

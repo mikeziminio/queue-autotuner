@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -47,11 +48,19 @@ type QueueScalingPolicyReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.22.4/pkg/reconcile
 func (r *QueueScalingPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = logf.FromContext(ctx)
+	log := logf.FromContext(ctx)
+	var policy autotunev1alpha1.QueueScalingPolicy
+	err := r.Get(ctx, req.NamespacedName, &policy)
+	if err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
 
-	// TODO(user): your logic here
+	// todo: добавить обращение в rmq, логику скейлинга
+	log.Info("Reconcile QueueScalingPolicy", "name", policy.Name)
 
-	return ctrl.Result{}, nil
+	return ctrl.Result{
+		RequeueAfter: 30 * time.Second,
+	}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

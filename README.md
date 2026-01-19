@@ -3,9 +3,10 @@
 # Plan
 
 Day 1
-- kubebuilder init
-- CRD
-- skeleton controller
+- Designed and validated Custom Resource Definition
+- Installed CRD into Kubernetes cluster (kind)
+- Implemented controller skeleton
+- Verified reconcile loop via live CR events
 
 Day 2
 - RabbitMQ client

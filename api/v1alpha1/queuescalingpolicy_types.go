@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -29,10 +30,21 @@ type QueueScalingPolicySpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 	// The following markers will use OpenAPI v3 schema to validate the value
 	// More info: https://book.kubebuilder.io/reference/markers/crd-validation.html
+	TargetRef corev1.ObjectReference `json:"targetRef"`
+	RabbitMQ  RabbitMQSpec           `json:"rabbitmq"`
+	Scaling   ScalingSpec            `json:"scaling"`
+}
 
-	// foo is an example field of QueueScalingPolicy. Edit queuescalingpolicy_types.go to remove/update
+type RabbitMQSpec struct {
+	Queue string `json:"queue"`
+
 	// +optional
-	Foo *string `json:"foo,omitempty"`
+	VHost string `json:"vhost,omitempty"`
+}
+
+type ScalingSpec struct {
+	MinReplicas int `json:"minReplicas"`
+	MaxReplicas int `json:"maxReplicas"`
 }
 
 // QueueScalingPolicyStatus defines the observed state of QueueScalingPolicy.
@@ -55,7 +67,7 @@ type QueueScalingPolicyStatus struct {
 	// +listType=map
 	// +listMapKey=type
 	// +optional
-	Conditions []metav1.Condition `json:"conditions,omitempty"`
+	// Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
 
 // +kubebuilder:object:root=true
